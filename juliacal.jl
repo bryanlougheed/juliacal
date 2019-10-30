@@ -66,7 +66,7 @@ medage:    Median age calculated from calprob.
 Examples
 ========
 
-p95, p68, calprob, medage] = matcal(1175, 30, "IntCal13", "BCE/CE")
+p95, p68, calprob, medage = matcal(1175, 30, "IntCal13", "BCE/CE")
 Calibrate a 14C age of 1175±30 14C yr BP to IntCal13 with output in BCE/CE.
 
 p95, p68, calprob, medage = matcal(23175, 60, "Marine13", "CalBP", resage=50, reserr=100)
