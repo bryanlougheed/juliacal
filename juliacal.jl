@@ -195,24 +195,24 @@ end
 # 2 sig
 hpd95 = hpd[hpd[:,3] .>= 1-erf(2/sqrt(2)), :]
 hpd95 = hpd95[sortperm(hpd95[:,1]),:] # sort by first column
-ind1 = findall(diff(hpd95[:,1]) .> 1)
-if isempty(ind1) == true
+ind2 = findall(diff(hpd95[:,1]) .> 1)
+if isempty(ind2) == true
 	p95 = fill(NaN,1,3)
 	p95[1,1] = hpd95[end,1]
 	p95[1,2] = hpd95[1,1]
 	p95[1,3] = sum(hpd95[1:end,dims=2])
 else
-	indy1 = fill(NaN,length(ind1)*2,1)
-	for i = 1:length(ind1)
-		indy1[i*2-1,1] = ind1[i]
-		indy1[i*2,1] = ind1[i]+1
+	indy2 = fill(NaN,length(ind2)*2,1)
+	for i = 1:length(ind2)
+		indy2[i*2-1,1] = ind2[i]
+		indy2[i*2,1] = ind2[i]+1
 	end
-	indy1 = trunc.(Int,[ 1  indy1' length(hpd95[:,1]) ])
-	p95 = fill(NaN,length(2:2:length(indy1)),3)
-	for i = 2:2:length(indy1)
-		p95[trunc(Int,i/2),1] = hpd95[indy1[i],1]
-		p95[trunc(Int,i/2),2] = hpd95[indy1[i-1],1]
-		p95[trunc(Int,i/2),3] = sum(hpd95[indy1[i-1]:indy1[i],2])
+	indy2 = trunc.(Int,[ 1  indy2' length(hpd95[:,1]) ])
+	p95 = fill(NaN,length(2:2:length(indy2)),3)
+	for i = 2:2:length(indy2)
+		p95[trunc(Int,i/2),1] = hpd95[indy2[i],1]
+		p95[trunc(Int,i/2),2] = hpd95[indy2[i-1],1]
+		p95[trunc(Int,i/2),3] = sum(hpd95[indy2[i-1]:indy2[i],2])
 	end
 	p95 = reverse(p95, dims=1)
 end
