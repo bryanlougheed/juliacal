@@ -5,6 +5,10 @@ using SpecialFunctions
 """
 p95, p68, calprob, medage = juliacal(c14age, c14err, calcurve, yeartype)
 
+juliacal v 0.1
+2019-10-30
+bryan.lougheed@geo.uu.se
+
 Radiocarbon (14C) calibration in Julia. Probabilistic age calibration with credible
 intervals using Bayesian highest posterior density (HPD). Based on the Matlab/Octave 
 function 'matcal' (Lougheed and Obrochta 2016), which was ported to Julia by
@@ -38,7 +42,6 @@ resage:    Optional (parameter name and value). Specify reservoir
 reserr:    Optional (parameter name and value). Specify a 1 sigma
            uncertainty for your chosen resage (default = 0)
            e.g. reserr=50 for an uncertainty of 50
-
 
 """
 function juliacal(c14age, c14err, calcurve, yeartype; resage=0, reserr=0)
