@@ -5,7 +5,7 @@ using SpecialFunctions
 """
 p95, p68, calprob, medage = juliacal(c14age, c14err, calcurve, yeartype)
 
-juliacal v 0.1
+juliacal v 0.2
 2019-10-30
 bryan.lougheed@geo.uu.se
 
