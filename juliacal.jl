@@ -10,12 +10,12 @@ juliacal v 0.1
 bryan.lougheed@geo.uu.se
 
 Radiocarbon (14C) calibration in Julia. Probabilistic age calibration with credible
-intervals using Bayesian highest posterior density (HPD). Based on the Matlab/Octave 
+intervals from Bayesian highest posterior density (HPD). Based on the Matlab/Octave 
 function 'matcal' (Lougheed and Obrochta 2016), which was ported to Julia by
 Bryan Lougheed in 2019.
 
 Will produce credible intervals, median age and an array of age probabilities.
-Calibration plot not yet available, still a work in progress!
+Calibration plot not yet available, still a work in progress!!!
 
 Required input
 ==============
@@ -31,8 +31,8 @@ calcurve:  String specifying calibration curve to use, select from
 yeartype:  String specifying how to report calibrated age.
            Choices are "CalBP" or "BCE/CE". (Not case sensitive)
 
-Optional input parameters
-=========================
+Optional input
+==============
 
 resage:    Optional (parameter name and value). Specify reservoir
            age in 14C yr. R(t) in the case of atmospheric calibration
@@ -43,8 +43,86 @@ reserr:    Optional (parameter name and value). Specify a 1 sigma
            uncertainty for your chosen resage (default = 0)
            e.g. reserr=50 for an uncertainty of 50
 
+Output
+======
+
+p95:       n by 3 array containing 95.45% calibrated age probability
+           range interval(s) calculated using highest posterior density.
+           Each row contains a probability range in Cols 1 and 2, and
+           the associated probability for that range in Col 3.
+           Probabilities are normalised to between zero and one.
+
+p68:       Same as p68, but for the 68.27% calibrated range.
+
+calprob:   n by 2 array containing an annualised calibrated age
+           probability density function for implementation in, e.g.,
+           age modelling. n is the annualised length of the chosen
+           calibration curve. Col 1 is a series of annual cal ages,
+           Col 2 contains their associated probability. All probabilities
+           are normalised such that they sum to 1.
+
+medage:    Median age calculated from calprob.
+
+Examples
+========
+
+p95, p68, calprob, medage] = matcal(1175, 30, "IntCal13", "BCE/CE")
+Calibrate a 14C age of 1175±30 14C yr BP to IntCal13 with output in BCE/CE.
+
+p95_4, p68_2, prob, medage = matcal(23175, 60, "Marine13", "CalBP", resage=50, reserr=100)
+Calibrate a 14C age of 23175±60 14C yr BP to Marine13 with delta-R of
+-50±100 14C yr.
+
 """
 function juliacal(c14age, c14err, calcurve, yeartype; resage=0, reserr=0)
+
+# Cal curve specification
+headerlines = 11
+if (lowercase(calcurve) == "intcal13") == true
+	calcurve = "IntCal13"
+	cite = "(Reimer et al., 2013)"
+	curvetype = "atm"
+elseif (lowercase(calcurve) == "marine13") == true
+	calcurve = "Marine13"
+	cite = "(Reimer et al., 2013)"
+	curvetype = "mar"
+elseif (lowercase(calcurve) == "shcal13") == true
+	calcurve = "SHCal13"
+	cite = "(Hogg et al., 2013)"
+	curvetype = "atm"
+elseif (lowercase(calcurve) == "intcal09") == true
+	calcurve = "IntCal09"
+	cite = "(Reimer et al., 2009)"
+	curvetype = "atm"
+elseif (lowercase(calcurve) == "marine09") == true
+	calcurve = "Marine09"
+	cite = "(Reimer et al., 2009)"
+	curvetype = "mar"
+elseif (lowercase(calcurve) == "intcal04") == true
+	calcurve = "IntCal04"
+	cite = "(Reimer et al., 2004)"
+	curvetype = "atm"
+elseif (lowercase(calcurve) == "marine04") == true
+	calcurve = "Marine04"
+	cite = "(Hughen et al., 2004)"
+	curvetype = "mar";
+elseif (lowercase(calcurve) == "shcal04") == true
+	calcurve = "SHCal04";
+	cite = "(McCormac et al., 2004)"
+	curvetype = "atm"
+elseif (lowercase(calcurve) == "intcal98") == true
+	headerlines = 18
+	calcurve = "IntCal98"
+	cite = "(Stuiver et al., 1998)"
+	curvetype = "atm"
+elseif (lowercase(calcurve) == "marine98") == true
+	headerlines = 18
+	calcurve = "Marine98"
+	cite = "(Stuiver et al., 1998)"
+	curvetype = "mar";
+else
+	error("Calibration curve unknown. Please specify a valid calibration curve (see help for options)")
+end
 
 # Process reservoir age
 if isnan(resage) == true
@@ -63,7 +141,7 @@ f14age = exp(c14age/-8033)
 f14err = f14age*c14err/8033
 
 # import calibration curve
-d = CSV.read("IntCal13.14c", delim=",", datarow=12, header=["calbp","c14age","c14err","d14c","d14cerr"])
+d = CSV.read(string(calcurve,".14c"), delim=",", datarow=headerlines+1, header=["calbp","c14age","c14err","d14c","d14cerr"])
 curvecal = reverse(d.calbp)
 curve14c = reverse(d.c14age)
 curve14cerr = reverse(d.c14err)
