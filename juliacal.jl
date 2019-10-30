@@ -141,10 +141,10 @@ f14age = exp(c14age/-8033)
 f14err = f14age*c14err/8033
 
 # import calibration curve
-d = CSV.read(string(calcurve,".14c"), delim=",", datarow=headerlines+1, header=["calbp","c14age","c14err","d14c","d14cerr"])
-curvecal = reverse(d.calbp)
-curve14c = reverse(d.c14age)
-curve14cerr = reverse(d.c14err)
+curve = CSV.read(string(calcurve,".14c"), delim=",", datarow=headerlines+1, header=["calbp","c14age","c14err","d14c","d14cerr"])
+curvecal = reverse(curve.calbp)
+curve14c = reverse(curve.c14age)
+curve14cerr = reverse(curve.c14err)
 curvef14 = exp.(curve14c./-8033) # convert to f14c space
 curvef14err = curvef14.*curve14cerr./8033 # convert to f14c space
 
@@ -166,7 +166,6 @@ hpd = collect(calprob)
 hpd = hpd[sortperm(hpd[:,2]),:] # sort rows by second column
 hpd = [hpd fill(NaN,length(hicurvecal),1)]
 hpd[:,3] = cumsum(hpd[:,2])
-
 # 1 sig
 hpd68 = hpd[hpd[:,3] .>= 1-erf(1/sqrt(2)), :]
 hpd68 = hpd68[sortperm(hpd68[:,1]),:] # sort by first column
@@ -175,7 +174,7 @@ if isempty(ind1) == true
 	p68 = fill(NaN,1,3)
 	p68[1,1] = hpd68[end,1]
 	p68[1,2] = hpd68[1,1]
-	p68[1,3] = sum(hpd68[1:end,dims=2])
+	p68[1,3] = sum(hpd68[:,2])
 else
 	indy1 = fill(NaN,length(ind1)*2,1)
 	for i = 1:length(ind1)
@@ -191,7 +190,6 @@ else
 	end
 	p68 = reverse(p68, dims=1)
 end
-
 # 2 sig
 hpd95 = hpd[hpd[:,3] .>= 1-erf(2/sqrt(2)), :]
 hpd95 = hpd95[sortperm(hpd95[:,1]),:] # sort by first column
@@ -200,7 +198,7 @@ if isempty(ind2) == true
 	p95 = fill(NaN,1,3)
 	p95[1,1] = hpd95[end,1]
 	p95[1,2] = hpd95[1,1]
-	p95[1,3] = sum(hpd95[1:end,dims=2])
+	p95[1,3] = sum(hpd95[:,2])
 else
 	indy2 = fill(NaN,length(ind2)*2,1)
 	for i = 1:length(ind2)
@@ -225,8 +223,8 @@ medage = trunc(Int,(calprob[indmed[1],1]))
 if (lowercase(yeartype) == "bce/ce") == true
 	medage = (medage-1950) * -1
 	calprob[:,1] = (calprob[:,1].-1950) .* -1
-	p95_4[:,1:2] = (p95_4[:,1:2].-1950) .* -1
-	p68_2[:,1:2] = (p68_2[:,1:2].-1950) .* -1
+	p95[:,1:2] = (p95[:,1:2].-1950) .* -1
+	p68[:,1:2] = (p68[:,1:2].-1950) .* -1
 end
 
 return p95, p68, calprob, medage
